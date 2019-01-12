@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# python stegano.py -c container.txt -m stego_message.txt -k somekey
-# python stegano.py -c stego_container.txt -k somekey
-
 import argparse
 
 
@@ -11,7 +6,7 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--container', required=True)
     parser.add_argument('-m', '--message')
-    parser.add_argument('-k', '--key', default=32)
+    parser.add_argument('-k', '--key', default=12345)
     return parser
 
 
@@ -52,7 +47,6 @@ def stego_message(container, message, key):
 
     stego_type = 1
     exit_flag = False
-
     while True:
         if exit_flag:
             break
@@ -97,7 +91,6 @@ def destego_message(container, key):
 
     stego_type = 1
     exit_flag = False
-
     while True:
         if exit_flag:
             break
@@ -150,7 +143,7 @@ def get_message(path):
     with open(path, "r") as file:
         message = file.read()
     if not message:
-        exit("Скрываемое сообщение не может быть пустым")
+        exit("Скрываемое сообщение не может быть пустым!")
     return message
 
 
@@ -169,7 +162,7 @@ def put_message(message):
 
 def _main():
     """Реализация стеганографии в текстовых файлах"""
-    # парсим аргументы
+    # парсинг аргументов
     parser = create_parser()
     namespace = parser.parse_args()
 
@@ -177,38 +170,36 @@ def _main():
     path_to_message = namespace.message
     key = int(namespace.key)
 
-    # проверяем правильность введённых аргументов и определяем тип операции
+    # проверка правильности введённых аргументов и определение типа операции
     operation_type = check_input(path_to_container, path_to_message, key)
 
-    # извлечём контейнер из файла
+    # извлечение контейнера из файла
     container = get_container(path_to_container)
 
     if operation_type == 1:
-        # извлечём сообщение из файла
+        # извлечение сообщения из файла
         message = get_message(path_to_message)
 
-        # преобразуем сообщение в двочиный код
+        # преобразование сообщения в двочиный код
         message = text2bin(message)
 
-        # проверим контейнер на вместимость сообщения
+        # проверка контейнера на вместимость сообщения
         check_container(container, message)
 
-        # встраиваем сообщение в контейнер
+        # встраивание сообщения в контейнер
         stego_message(container, message, key)
 
     elif operation_type == 2:
-        # извлекаем сообщение из контейнера
+        # извлечение сообщения из контейнера
         message = destego_message(container, key)
 
-        # преобразуем двоичный код в десятеричный
+        # преобразование двоичного кода в десятичный
         message = bin2text(message)
 
-        # запишем извлечённое сообщение в файл и выведем его на экран
+        # запись извлечённого сообщения в файл и вывод его на экран
         put_message(message)
         print(message)
 
 
 if __name__ == "__main__":
     _main()
-
-
