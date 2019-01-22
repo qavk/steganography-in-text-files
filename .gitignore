@@ -1,5 +1,6 @@
 .idea/
 files/
 __pycache__/
+venv/
 secret_message.txt
 stego_container.txt
