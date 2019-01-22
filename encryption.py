@@ -1,8 +1,8 @@
 class SpeckCipher(object):
-    """Speck Block Cipher Object"""
+    """Реализация шифра Speck"""
 
     def encrypt_round(self, x, y, k):
-        """Complete One Round of Feistel Operation"""
+        """Раунд шифра Speck"""
         rs_x = ((x << (self.word_size - self.alpha_shift)) + (x >> self.alpha_shift)) & self.mod_mask
         add_sxy = (rs_x + y) & self.mod_mask
         new_x = k ^ add_sxy
@@ -11,7 +11,6 @@ class SpeckCipher(object):
         return new_x, new_y
 
     def __init__(self, key):
-
         self.key_size = 128
         self.block_size = 128
         self.word_size = self.block_size >> 1
@@ -23,7 +22,7 @@ class SpeckCipher(object):
 
         self.key = key & ((2 ** self.key_size) - 1)
 
-        # Pre-compile key schedule
+        # генерируем список раундовых ключей
         self.key_schedule = [self.key & self.mod_mask]
         l_schedule = [(self.key >> (x * self.word_size)) & self.mod_mask for x in
                       range(1, self.key_size // self.word_size)]
@@ -34,6 +33,7 @@ class SpeckCipher(object):
             self.key_schedule.append(new_l_k[1])
 
     def encrypt(self, plaintext):
+        """Метод шифрования блока исходного текста"""
         b = (plaintext >> self.word_size) & self.mod_mask
         a = plaintext & self.mod_mask
 
@@ -43,6 +43,7 @@ class SpeckCipher(object):
         return ciphertext
 
     def decrypt(self, ciphertext):
+        """Метод расшифровывания блока шифр-текста"""
         b = (ciphertext >> self.word_size) & self.mod_mask
         a = ciphertext & self.mod_mask
 
@@ -52,10 +53,10 @@ class SpeckCipher(object):
         return plaintext
 
     def encrypt_function(self, upper_word, lower_word):
+        """Раундовая функция шифрования Speck"""
         x = upper_word
         y = lower_word
 
-        # Run Encryption Steps For Appropriate Number of Rounds
         for k in self.key_schedule:
             rs_x = ((x << (self.word_size - self.alpha_shift)) + (x >> self.alpha_shift)) & self.mod_mask
             add_sxy = (rs_x + y) & self.mod_mask
@@ -65,10 +66,10 @@ class SpeckCipher(object):
         return x, y
 
     def decrypt_function(self, upper_word, lower_word):
+        """Раундовая функция расшифровывания Speck"""
         x = upper_word
         y = lower_word
 
-        # Run Encryption Steps For Appropriate Number of Rounds
         for k in reversed(self.key_schedule):
             xor_xy = x ^ y
             y = ((xor_xy << (self.word_size - self.beta_shift)) + (xor_xy >> self.beta_shift)) & self.mod_mask
